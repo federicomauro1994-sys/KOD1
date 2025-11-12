@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Новое поступление</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f2f5f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1a1a1a;
+      margin-bottom: 5px;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: #444;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #0078d7;
+      border-left: 4px solid #0078d7;
+      padding-left: 10px;
+      margin-top: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input[type="file"] {
+      padding: 6px;
+      background: #f9f9f9;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 25px;
+      background: #0078d7;
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background: #005fa3;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 16px;
+      color: #555;
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 15px; }
+      button { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Новое поступление</h1>
+    <p class="subtitle">Прошу согласовать необходимые работы:</p>
+
+    <form id="carForm">
+
+      <h2>Данные автомобиля</h2>
+      <label>Фамилия:</label>
+      <input type="text" name="surname" placeholder="Введите вашу фамилию" required>
+
+      <label>Модель:</label>
+      <select name="model" required>
+        <option value="">Выберите модель</option>
+        <option>LX FL</option>
+        <option>TXL FL</option>
+        <option>RX</option>
+        <option>VX FL</option>
+        <option>EXLANTIX ES</option>
+        <option>EXLANTIX ET</option>
+      </select>
+
+      <label>VIN:</label>
+      <input type="text" name="vin" placeholder="Введите VIN" required>
+
+      <h2>Фото</h2>
+
+      <label>Угол 45 градусов (макс. 2 фото)</label>
+      <input type="file" name="angle45" accept="image/*" multiple required>
+
+      <label>VIN в проеме (1 фото)</label>
+      <input type="file" name="vin_door" accept="image/*" required>
+
+      <label>VIN на лобовом стекле (необязательно)</label>
+      <input type="file" name="vin_glass" accept="image/*">
+
+      <label>Пробег (1 фото)</label>
+      <input type="file" name="mileage" accept="image/*" required>
+
+      <label>Поврежденные детали (необязательно)</label>
+      <input type="file" name="damaged_parts" accept="image/*" multiple>
+
+      <label>Размер повреждений (с линейкой, необязательно)</label>
+      <input type="file" name="damage_size" accept="image/*" multiple>
+
+      <h2>Документы</h2>
+
+      <label>Фото ТТН</label>
+      <input type="file" name="ttn" accept="image/*" multiple required>
+
+      <label>Фото АПП</label>
+      <input type="file" name="app" accept="image/*" multiple required>
+
+      <h2>Необходимый ремонт</h2>
+      <textarea name="comment" rows="4" placeholder="Опишите повреждения и необходимый ремонт..." required></textarea>
+
+      <button type="submit" id="sendBtn">📤 Отправить</button>
+      <div class="status" id="statusText">⏳ Отправка данных...</div>
+    </form>
+  </div>
+
+  <script>
+    const BOT_TOKEN = "8085152073:AAEswBB4AdRxMkgYQs3lYQH7ceT2-w0CRCk";
+    const CHAT_ID = "-5098344731";
+
+    async function sendTextMessage(text) {
+      return fetch(https://api.telegram.org/bot${BOT_TOKEN}/sendMessage, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: text,
+          parse_mode: "HTML"
+        })
+      });
+    }
+
+    async function sendAlbum(files, caption) {
+      if (!files.length) return;
+      const formData = new FormData();
+      const media = [];
+
+      for (const file of files) {
+        media.push({ type: "photo", media: "attach://" + file.name });
+        formData.append(file.name, file);
+      }
+
+      formData.append("chat_id", CHAT_ID);
+      formData.append("media", JSON.stringify(media));
+      if (caption) {
+        formData.append("caption", caption);
+        formData.append("parse_mode", "HTML");
+      }
+
+      await fetch(https://api.telegram.org/bot${BOT_TOKEN}/sendMediaGroup, {
+        method: "POST",
+        body: formData
+      });
+    }
+
+    document.getElementById("carForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const btn = document.getElementById("sendBtn");
+      const statusText = document.getElementById("statusText");
+
+      btn.disabled = true;
+      statusText.style.display = "block";
+      statusText.textContent = "⏳ Отправка данных...";
+
+      const surname = form.surname.value.trim();
+      const model = form.model.value.trim();
+      const vin = form.vin.value.trim();
+      const comment = form.comment.value.trim();
+      const date = new Date().toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const header = 🚘 <b>Новое поступление</b>\n━━━━━━━━━━━━━━━;
+      const info = \n👤 <b>Фамилия:</b> ${surname}\n<b>Модель:</b> ${model}\n<b>VIN:</b> ${vin}\n<b>Дата отправки:</b> ${date}\n━━━━━━━━━━━━━━━\n🛠 <b>Комментарий:</b>\n${comment}\n━━━━━━━━━━━━━━━\n📎 Фото и документы будут прикреплены ниже.;
+
+      try {
+        await sendTextMessage(header + info);
+
+        await sendAlbum(form.angle45.files, "📷 Фото угла 45°");
+        await sendAlbum(form.vin_door.files, "📸 Фото VIN в проеме");
+        await sendAlbum(form.vin_glass.files, "📸 Фото VIN на лобовом стекле");
+        await sendAlbum(form.mileage.files, "📸 Фото пробега");
+        await sendAlbum(form.damaged_parts.files, "📸 Поврежденные детали");
+        await sendAlbum(form.damage_size.files, "📏 Размер повреждений (с линейкой)");
+        await sendAlbum(form.ttn.files, "📄 Фото ТТН");
+        await sendAlbum(form.app.files, "📄 Фото АПП");
+
+        statusText.textContent = "✅ Заявка успешно отправлена!";
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        statusText.textContent = "❌ Ошибка при отправке. Попробуйте снова.";
+      } finally {
+        btn.disabled = false;
+        setTimeout(() => (statusText.style.display = "none"), 3000);
+      }
+    });
+  </script>
+</body>
+</html>
